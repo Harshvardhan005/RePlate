@@ -761,3 +761,78 @@
             border-color: var(--sage-dark);
             box-shadow: var(--shadow-soft);
         }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: var(--shadow-soft); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(122,155,142,0.3); }
+        }
+
+        /* Mobile-friendly Cards Grid */
+        .mobile-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .mobile-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(245,239,224,0.9));
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: all 0.3s ease;
+        }
+
+        .mobile-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .mobile-card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--cream-dark);
+            font-size: 0.95rem;
+            gap: 1rem;
+        }
+
+        .mobile-card-row:last-child {
+            border-bottom: none;
+        }
+
+        .mobile-card-label {
+            color: var(--sage-dark);
+            font-weight: 600;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        /* Org cards grid */
+        .org-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .org-card-item {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(245,239,224,0.9));
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(255,255,255,0.6);
+            transition: all 0.3s ease;
+        }
+
+        .org-card-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        @media (max-width: 480px) {
+            .mobile-cards-grid,
+            .org-cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
