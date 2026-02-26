@@ -1,4 +1,4 @@
-const SUPABASE_URL = 'https://dmpwoptlllysnfzjkgwg.supabase.co';;
+const SUPABASE_URL = 'https://dmpwoptlllysafzjkgwg.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtcHdvcHRsbGx5c25memprZ3dnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIwMjg4NzEsImV4cCI6MjA4NzYwNDg3MX0.tnBtE0pJefBUu2MmHYdZ4QQm38SBKzbPpbXQQb1cqxA';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -6,7 +6,6 @@ const SUPABASE_URL = 'https://dmpwoptlllysnfzjkgwg.supabase.co';;
         let map = null;
         let currentRadius = 10;
         let markers = [];
-        let locationMode = 'auto'; // 'auto' or 'manual'
 
         document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('surplusDate').valueAsDate = new Date();
@@ -35,59 +34,12 @@ const SUPABASE_URL = 'https://dmpwoptlllysnfzjkgwg.supabase.co';;
                     statusEl.textContent = `Location detected: ${userLocation.lat.toFixed(4)}, ${userLocation.lng.toFixed(4)} ✓`;
                 },
                 (error) => {
-                    statusEl.textContent = 'Could not detect location. Please use Manual entry.';
+                    statusEl.textContent = 'Using default location (Ludhiana)';
                     userLocation = { lat: 30.9010, lng: 75.8573 };
                     document.getElementById('orgLat').value = userLocation.lat;
                     document.getElementById('orgLng').value = userLocation.lng;
                 }
             );
-        }
-
-        function setLocationMode(mode) {
-            locationMode = mode;
-
-            const autoPanel = document.getElementById('autoLocationPanel');
-            const manualPanel = document.getElementById('manualLocationPanel');
-            const btnAuto = document.getElementById('btnAutoLocation');
-            const btnManual = document.getElementById('btnManualLocation');
-            const latLabel = document.getElementById('latModeLabel');
-            const lngLabel = document.getElementById('lngModeLabel');
-            const orgLat = document.getElementById('orgLat');
-            const orgLng = document.getElementById('orgLng');
-
-            if (mode === 'auto') {
-                autoPanel.style.display = 'block';
-                manualPanel.style.display = 'none';
-                btnAuto.classList.add('active');
-                btnManual.classList.remove('active');
-                latLabel.textContent = '(Auto-detected)';
-                lngLabel.textContent = '(Auto-detected)';
-                orgLat.readOnly = true;
-                orgLng.readOnly = true;
-                detectLocation();
-            } else {
-                autoPanel.style.display = 'none';
-                manualPanel.style.display = 'block';
-                btnAuto.classList.remove('active');
-                btnManual.classList.add('active');
-                latLabel.textContent = '(From manual entry)';
-                lngLabel.textContent = '(From manual entry)';
-                orgLat.readOnly = true;
-                orgLng.readOnly = true;
-                // Clear fields for manual entry
-                orgLat.value = '';
-                orgLng.value = '';
-            }
-        }
-
-        function syncManualCoords() {
-            const lat = document.getElementById('orgLatManual').value;
-            const lng = document.getElementById('orgLngManual').value;
-            document.getElementById('orgLat').value = lat;
-            document.getElementById('orgLng').value = lng;
-            if (lat && lng) {
-                userLocation = { lat: parseFloat(lat), lng: parseFloat(lng) };
-            }
         }
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -238,27 +190,15 @@ const SUPABASE_URL = 'https://dmpwoptlllysnfzjkgwg.supabase.co';;
             }
 
             document.getElementById('surplusList').innerHTML = `
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Prepared</th>
-                                <th>Consumed</th>
-                                <th>Surplus</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${surplus.map(s => `
-                                <tr>
-                                    <td><strong>${s.date}</strong></td>
-                                    <td>${s.meals_prepared}</td>
-                                    <td>${s.meals_consumed}</td>
-                                    <td><strong style="background: var(--gradient-sage); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">${s.surplus_kg} kg</strong></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                <div class="mobile-cards-grid">
+                    ${surplus.map(s => `
+                        <div class="mobile-card">
+                            <div class="mobile-card-row"><span class="mobile-card-label">📅 Date</span><strong>${s.date}</strong></div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">🍽️ Prepared</span>${s.meals_prepared} meals</div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">✅ Consumed</span>${s.meals_consumed} meals</div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">📦 Surplus</span><strong style="color:var(--forest-dark)">${s.surplus_kg} kg</strong></div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
         }
@@ -364,31 +304,20 @@ const SUPABASE_URL = 'https://dmpwoptlllysnfzjkgwg.supabase.co';;
             }
 
             document.getElementById('orgList').innerHTML = `
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Name</th>
-                                <th>Address</th>
-                                <th>Capacity</th>
-                                <th>Contact</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${orgs.map(org => `
-                                <tr>
-                                    <td><span class="org-badge badge-${org.org_type}">${org.org_type}</span></td>
-                                    <td><strong style="color: var(--forest-darker);">${org.name}</strong></td>
-                                    <td>${org.address}</td>
-                                    <td><strong>${org.capacity} kg</strong></td>
-                                    <td>${org.contact}</td>
-                                    <td><button class="btn btn-danger" onclick="deleteOrg(${org.id})">Delete</button></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                <div class="mobile-cards-grid">
+                    ${orgs.map(org => `
+                        <div class="mobile-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem;">
+                                <span class="org-badge badge-${org.org_type}">${org.org_type.toUpperCase()}</span>
+                                <button class="btn btn-danger" onclick="deleteOrg(${org.id})">🗑️</button>
+                            </div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">🏢 Name</span><strong>${org.name}</strong></div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">📍 Address</span>${org.address}</div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">⚖️ Capacity</span><strong>${org.capacity} kg</strong></div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">📞 Contact</span>${org.contact}</div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">📡 Radius</span>${org.service_radius} km</div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
         }
@@ -536,27 +465,15 @@ const SUPABASE_URL = 'https://dmpwoptlllysnfzjkgwg.supabase.co';;
             }
 
             document.getElementById('recentActivity').innerHTML = `
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Prepared</th>
-                                <th>Consumed</th>
-                                <th>Surplus</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.map(s => `
-                                <tr>
-                                    <td><strong>${s.date}</strong></td>
-                                    <td>${s.meals_prepared}</td>
-                                    <td>${s.meals_consumed}</td>
-                                    <td><strong style="background: var(--gradient-sage); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">${s.surplus_kg} kg</strong></td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                <div class="mobile-cards-grid">
+                    ${data.map(s => `
+                        <div class="mobile-card">
+                            <div class="mobile-card-row"><span class="mobile-card-label">📅 Date</span><strong>${s.date}</strong></div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">🍽️ Prepared</span>${s.meals_prepared} meals</div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">✅ Consumed</span>${s.meals_consumed} meals</div>
+                            <div class="mobile-card-row"><span class="mobile-card-label">📦 Surplus</span><strong style="color:var(--forest-dark)">${s.surplus_kg} kg</strong></div>
+                        </div>
+                    `).join('')}
                 </div>
             `;
         }
