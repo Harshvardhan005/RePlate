@@ -665,3 +665,13 @@ function showToast(message, type) {
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3500);
 }
+
+// Expose functions globally for HTML onclick handlers
+window.showPage = showPage;
+window.selectOrgType = selectOrgType;
+window.setLocationMode = setLocationMode;
+window.syncManualCoords = syncManualCoords;
+window.changeRadius = changeRadius;
+window.deleteOrg = deleteOrg;
+window.submitOrganization = submitOrganization;
+window.submitSurplus = submitSurplus;
