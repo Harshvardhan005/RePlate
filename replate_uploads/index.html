@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RePlate - Food Waste Redistribution System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- External Libraries -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- YOUR CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div class="bg-decoration"></div>
+
+    <header>
+        <div class="header-content">
+            <a href="#" class="logo" onclick="showPage('dashboard'); return false;">
+                <div class="logo-icon">🍽️</div>
+                <div>
+                    <h1>RePlate</h1>
+                    <div class="logo-subtitle">Sustainable Food Redistribution</div>
+                </div>
+            </a>
+            <nav>
+                <button class="nav-btn active" onclick="showPage('dashboard')" data-page="dashboard">Dashboard</button>
+                <button class="nav-btn" onclick="showPage('mapview')" data-page="mapview">Map View</button>
+                <button class="nav-btn" onclick="showPage('register')" data-page="register">Register</button>
+                <button class="nav-btn" onclick="showPage('surplus')" data-page="surplus">Add Surplus</button>
+                <button class="nav-btn" onclick="showPage('impact')" data-page="impact">Impact</button>
+                <button class="nav-btn" onclick="showPage('organizations')" data-page="organizations">Organizations</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Dashboard -->
+        <div id="dashboard" class="page active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Organizations</div>
+                    <div class="stat-value"><span id="totalOrgs">0</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Weekly Surplus</div>
+                    <div class="stat-value"><span id="weekSurplus">0</span> <span class="stat-unit">kg</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">People Fed</div>
+                    <div class="stat-value"><span id="peopleFed">0</span></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">CO₂ Saved</div>
+                    <div class="stat-value"><span id="co2Saved">0</span> <span class="stat-unit">kg</span></div>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="chart-card">
+                    <h3>📈 Weekly Surplus Trend</h3>
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <h3>🌍 Monthly Impact</h3>
+                    <canvas id="monthlyImpactChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📋</div>
+                    <h2 class="card-title">Recent Activity</h2>
+                </div>
+                <div id="recentActivity"></div>
+            </div>
+        </div>
+
+        <!-- Map View -->
+        <div id="mapview" class="page">
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div style="padding: 2rem 2.5rem; background: var(--gradient-sage);">
+                    <h2 style="margin: 0; font-size: 1.8rem; color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">🗺️ Nearby Organizations</h2>
+                    <p style="margin: 0.5rem 0 0 0; color: rgba(255,255,255,0.95);">Discover food sources and NGOs in your area</p>
+                </div>
+                
+                <div class="map-controls">
+                    <span style="font-weight: 600; color: var(--forest-darker);">Show within:</span>
+                    <button class="radius-btn active" onclick="changeRadius(5)" data-radius="5">5 km</button>
+                    <button class="radius-btn" onclick="changeRadius(10)" data-radius="10">10 km</button>
+                    <button class="radius-btn" onclick="changeRadius(20)" data-radius="20">20 km</button>
+                    <div style="flex: 1;"></div>
+                    <div style="font-size: 0.9rem; font-weight: 500;">
+                        <span style="color: var(--sage-green);">●</span> Food Sources &nbsp;
+                        <span style="color: var(--forest-dark);">●</span> NGOs &nbsp;
+                        <span style="color: var(--terracotta);">●</span> You
+                    </div>
+                </div>
+                
+                <div id="mapContainer"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📍</div>
+                    <h2 class="card-title">Nearby (<span id="nearbyCount">0</span>)</h2>
+                </div>
+                <div id="nearbyList" class="nearby-list"></div>
+            </div>
+        </div>
+
+        <!-- Register -->
+        <div id="register" class="page">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🌱</div>
+                    <h2 class="card-title">Register Organization</h2>
+                </div>
+
+                <!-- Location Mode Toggle -->
+                <div style="margin-bottom: 2rem;">
+                    <label style="display: block; font-weight: 700; margin-bottom: 1rem; font-size: 1.1rem; background: var(--gradient-forest); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">📍 Location Method</label>
+                    <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                        <button type="button" id="btnAutoLocation" class="location-toggle-btn active" onclick="setLocationMode('auto')">
+                            🛰️ Auto Detect
+                        </button>
+                        <button type="button" id="btnManualLocation" class="location-toggle-btn" onclick="setLocationMode('manual')">
+                            ✏️ Enter Manually
+                        </button>
+                    </div>
+
+                    <!-- Auto Detect Status -->
+                    <div id="autoLocationPanel">
+                        <div id="locationStatus" class="location-status">
+                            <span style="font-size: 1.5rem;">📍</span>
+                            <span id="locationText">Detecting your location...</span>
+                        </div>
+                    </div>
+
+                    <!-- Manual Entry Panel -->
+                    <div id="manualLocationPanel" style="display: none;">
+                        <div style="background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(245,239,224,0.8)); border-radius: 20px; padding: 1.5rem; border: 2px solid var(--cream-dark);">
+                            <p style="font-size: 0.9rem; color: var(--sage-dark); margin-bottom: 1.2rem; font-weight: 500;">
+                                💡 Find your coordinates at <a href="https://www.latlong.net" target="_blank" style="color: var(--forest-dark); font-weight: 600;">latlong.net</a> or right-click on Google Maps
+                            </p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem;">
+                                <div class="form-group">
+                                    <label>Latitude</label>
+                                    <input type="number" step="any" id="orgLatManual" placeholder="e.g. 30.9010" oninput="syncManualCoords()">
+                                </div>
+                                <div class="form-group">
+                                    <label>Longitude</label>
+                                    <input type="number" step="any" id="orgLngManual" placeholder="e.g. 75.8573" oninput="syncManualCoords()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="orgForm" onsubmit="submitOrganization(event)">
+                    <div style="margin-bottom: 2.5rem;">
+                        <label style="display: block; font-weight: 700; margin-bottom: 1.5rem; font-size: 1.2rem; background: var(--gradient-forest); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Select Organization Type</label>
+                        <div class="org-type-selector">
+                            <div class="org-type-card" onclick="selectOrgType('college')">
+                                <div class="icon">🎓</div>
+                                <div class="label">College</div>
+                            </div>
+                            <div class="org-type-card" onclick="selectOrgType('hotel')">
+                                <div class="icon">🏨</div>
+                                <div class="label">Hotel</div>
+                            </div>
+                            <div class="org-type-card" onclick="selectOrgType('restaurant')">
+                                <div class="icon">🍽️</div>
+                                <div class="label">Restaurant</div>
+                            </div>
+                            <div class="org-type-card" onclick="selectOrgType('ngo')">
+                                <div class="icon">🤝</div>
+                                <div class="label">NGO</div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="orgType" required>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Organization Name</label>
+                            <input type="text" id="orgName" placeholder="e.g., Green Valley College" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Address</label>
+                            <input type="text" id="orgAddress" placeholder="e.g., Sector 21, City" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Latitude <span id="latModeLabel" style="font-size:0.8rem; color: var(--sage-dark);">(Auto-detected)</span></label>
+                            <input type="number" step="any" id="orgLat" readonly placeholder="Will be set automatically">
+                        </div>
+                        <div class="form-group">
+                            <label>Longitude <span id="lngModeLabel" style="font-size:0.8rem; color: var(--sage-dark);">(Auto-detected)</span></label>
+                            <input type="number" step="any" id="orgLng" readonly placeholder="Will be set automatically">
+                        </div>
+                        <div class="form-group">
+                            <label>Daily Capacity (kg)</label>
+                            <input type="number" id="orgCapacity" min="0" placeholder="e.g., 50" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Service Time</label>
+                            <input type="time" id="orgTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Number</label>
+                            <input type="tel" id="orgContact" placeholder="+91 98765 43210" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Service Radius (km)</label>
+                            <input type="number" id="orgRadius" value="10" min="1" max="50" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <span>✓</span> Register Organization
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Surplus -->
+        <div id="surplus" class="page">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">➕</div>
+                    <h2 class="card-title">Add Daily Surplus</h2>
+                </div>
+
+                <form id="surplusForm" onsubmit="submitSurplus(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="surplusDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Meals Prepared</label>
+                            <input type="number" id="mealsPrepared" min="0" placeholder="e.g., 500" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Meals Consumed</label>
+                            <input type="number" id="mealsConsumed" min="0" placeholder="e.g., 450" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Surplus (kg)</label>
+                            <input type="number" step="0.1" id="surplusKg" min="0" placeholder="e.g., 25" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <span>💾</span> Save Surplus Data
+                    </button>
+                </form>
+
+                <div id="matchResult"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📋</div>
+                    <h2 class="card-title">Recent Entries</h2>
+                </div>
+                <div id="surplusList"></div>
+            </div>
+        </div>
+
+        <!-- Impact -->
+        <div id="impact" class="page">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🌍</div>
+                    <h2 class="card-title">Environmental Impact</h2>
+                </div>
+
+                <div class="impact-grid">
+                    <div class="impact-card">
+                        <div class="impact-icon">🍱</div>
+                        <div class="impact-value"><span id="totalFoodSaved">0</span> kg</div>
+                        <div class="impact-label">Food Redistributed</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-icon">🌱</div>
+                        <div class="impact-value"><span id="totalCO2">0</span> kg</div>
+                        <div class="impact-label">CO₂ Prevented</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-icon">🌳</div>
+                        <div class="impact-value"><span id="treesEquiv">0</span></div>
+                        <div class="impact-label">Trees Equivalent</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-icon">👥</div>
+                        <div class="impact-value"><span id="totalPeopleFed">0</span></div>
+                        <div class="impact-label">People Fed</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-icon">💰</div>
+                        <div class="impact-value">₹<span id="carbonCredit">0</span></div>
+                        <div class="impact-label">Carbon Credits</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-icon">📦</div>
+                        <div class="impact-value"><span id="totalDeliveries">0</span></div>
+                        <div class="impact-label">Deliveries</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>📊 Monthly Environmental Impact</h3>
+                <canvas id="impactChart"></canvas>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">📅</div>
+                    <h2 class="card-title">Annual Projection</h2>
+                </div>
+
+                <div class="impact-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="impact-card">
+                        <div class="impact-icon">🍽️</div>
+                        <div class="impact-value"><span id="annualFood">0</span> kg</div>
+                        <div class="impact-label">Annual Food</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-icon">👨‍👩‍👧‍👦</div>
+                        <div class="impact-value"><span id="annualPeople">0</span></div>
+                        <div class="impact-label">People/Year</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-icon">🌍</div>
+                        <div class="impact-value"><span id="annualCO2">0</span> t</div>
+                        <div class="impact-label">CO₂/Year</div>
+                    </div>
+                    <div class="impact-card">
+                        <div class="impact-icon">💵</div>
+                        <div class="impact-value">₹<span id="annualRevenue">0</span>L</div>
+                        <div class="impact-label">Revenue</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Organizations -->
+        <div id="organizations" class="page">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">🏢</div>
+                    <h2 class="card-title">All Organizations</h2>
+                </div>
+                <div id="orgList"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- YOUR JS -->
+    <script src="js/app.js"></script>
+
+</body>
+</html>
