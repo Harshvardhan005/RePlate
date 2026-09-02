@@ -1,2 +1,2 @@
 # RePlate
-connection between NGOs and leftover food providers
+connection between NGOs and leftover food providers.
