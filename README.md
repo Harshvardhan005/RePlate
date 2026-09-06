@@ -28,11 +28,11 @@ Replate aims to bridge this gap** by creating a platform where surplus food can 
 
 💡 How Replate Works
 
-1. **Food Provider uploads surplus food details**
-2. **Replate identifies suitable recipients or organizations**
-3. **Nearby available food can be discovered**
-4. **Pickup or redistribution is coordinated**
-5. **Donation status is updated after completion**
+1. Food Provider uploads surplus food details
+2. Replate identifies suitable recipients or organizations
+3. Nearby available food can be discovered
+4. Pickup or redistribution is coordinated
+5. Donation status is updated after completion
 
 🎯Target Users
 
